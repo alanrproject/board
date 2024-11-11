@@ -7,8 +7,9 @@ class Project:
         self.fecha_fin = fecha_fin
 
 class ProjectTask:
-    def __init__(self, project_id, start_date, end_date, notes):
+    def __init__(self, project_id, project_name, start_date, end_date, notes):
         self.project_id = project_id
+        self.project_name = project_name
         self.start_date = start_date
         self.end_date = end_date
         self.notes = notes
