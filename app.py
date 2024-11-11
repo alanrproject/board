@@ -13,7 +13,7 @@ kanban = TableroKanban(app)
 app.layout = html.Div([
     dcc.Tabs([
         dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
-        dcc.Tab(label='Tablero Kanban', children=kanban.layout)
+        # dcc.Tab(label='Tablero Kanban', children=kanban.layout)
     ])
 ])
 

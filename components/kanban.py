@@ -9,7 +9,6 @@ class TableroKanban:
         self.register_callbacks()
 
     def create_layout(self):
-        # Define el layout para la pestaña Kanban
         return html.Div([
             dcc.Dropdown(
                 id='kanban-status-dropdown',
@@ -24,15 +23,16 @@ class TableroKanban:
         ])
 
     def register_callbacks(self):
-        # Define el callback para actualizar el tablero Kanban
         @self.app.callback(
             Output('kanban-output', 'children'),
             [Input('kanban-status-dropdown', 'value')]
         )
         def update_kanban(selected_status):
-            # Lógica para actualizar el tablero Kanban basado en el estado seleccionado
-            query = f"SELECT * FROM tasks WHERE status = '{selected_status}'"
-            data = self.db_connector.fetch_data(query)
-            return f"Tareas para el estado {selected_status}: {data}"
-
-
+            projects = self.db_connector.fetch_projects()
+            filtered_projects = [p for p in projects if p.estado == selected_status]
+            return [
+                html.Div([
+                    html.H4(proj.nombre),
+                    html.P(f"Inicia: {proj.fecha_inicio}, Fin: {proj.fecha_fin}")
+                ], className="kanban-card") for proj in filtered_projects
+            ]
