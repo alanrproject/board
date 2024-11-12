@@ -1,3 +1,4 @@
+/* General Reset */
 *,
 *::before,
 *::after {
@@ -30,15 +31,13 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Estilo para el contenedor del calendario */
+/* General styles for calendar container */
 .calendar-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     padding: 10px;
+    /* Puedes ajustar este padding si deseas más espacio alrededor del gráfico */
 }
 
-/* Cabecera con los días de la semana */
+/* Header Row - Puedes conservar esto en caso de agregar una cabecera encima del gráfico */
 .calendar-header-row {
     display: flex;
     justify-content: space-between;
@@ -47,66 +46,11 @@ body {
     padding-bottom: 5px;
 }
 
-/* Estilo para cada celda del día */
-.calendar-day {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;  /* Separación entre las tareas */
-    border: 1px solid #ddd;
-    padding: 10px;
-    min-height: 150px;
-    position: relative;
-    box-sizing: border-box;
-}
-/* Estilo para cada celda del día (contenedor) */
-.calendar-container .calendar-day {
-    width: 20px !important;  /* Ancho fijo */
-}
-/* Añadir borde derecho a todos los días excepto el último */
-.calendar-day:last-child {
-    border-right: solid;
-}
-
-/* Estilo para las tareas dentro de las celdas (combina ambas reglas) */
-.task-content {
-    padding: 3px;
-    border: 1px solid #ccc;
-    background-color: #68ceaf;  /* Color de fondo por defecto para la tarea */
-    margin-bottom: 2px;
-    border-radius: 3px;
-    width: 100%;  /* Ajusta el tamaño de la tarea según su duración */
-    position: relative;  /* Posicionamiento relativo para evitar que se superpongan */
-    box-sizing: border-box;  /* Asegura que el padding y borde estén dentro del ancho total */
-}
-
-
-/* Para las listas de tareas dentro de cada día */
-.day-task-list {
-    margin-top: 10px;
-    max-height: 120px;
-    overflow-y: auto;
-}
-
-/* Añadir una pequeña sombra a las celdas de los días */
-.calendar-day {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Estilo para los títulos de las tareas */
-.task-title {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-/* Mejorar la visibilidad en dispositivos pequeños */
+/* Mejorar visibilidad en dispositivos pequeños */
 @media screen and (max-width: 768px) {
     .calendar-header-row {
         flex-direction: column;
         align-items: center;
-    }
-    .calendar-day {
-        width: 100%;
-        margin-bottom: 10px;
     }
     .calendar-container {
         gap: 10px;

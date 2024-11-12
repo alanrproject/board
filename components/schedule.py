@@ -11,7 +11,6 @@ class CronogramaSemanal:
         self.register_callbacks()
 
     def create_layout(self):
-        # Define el layout para la pestaña de cronograma semanal, agregando el gráfico
         return html.Div([
             dcc.Dropdown(
                 id='schedule-dropdown',
@@ -30,85 +29,100 @@ class CronogramaSemanal:
             [Input('schedule-dropdown', 'value')]
         )
         def update_schedule(_):
-            # Obtener los proyectos programados para la semana actual de lunes a sábado
+            # Rango de fechas para la semana de lunes a sábado
             today = datetime.today()
             start_of_week = today - timedelta(days=today.weekday())  # Lunes
-            end_of_week = start_of_week + timedelta(days=5)  # Sábado
+            end_of_week = start_of_week + timedelta(days=6)  # Sábado
 
+            # Consulta SQL para obtener tareas de la semana
             query = f"""
             SELECT pt.project_id, p.name AS project_name, pt.start_date, pt.end_date, pt.notes
             FROM `project-tasks` pt
             JOIN projects p ON pt.project_id = p.id
-            WHERE pt.start_date >= '{start_of_week.strftime('%Y-%m-%d')}'
-            AND pt.start_date <= '{end_of_week.strftime('%Y-%m-%d')}'
+            WHERE (pt.start_date >= '{start_of_week.strftime('%Y-%m-%d')}' 
+                   AND pt.start_date <= '{end_of_week.strftime('%Y-%m-%d')}')
+            OR (pt.end_date >= '{start_of_week.strftime('%Y-%m-%d')}' 
+                AND pt.end_date <= '{end_of_week.strftime('%Y-%m-%d')}')
             AND pt.is_deleted != 1
             """
-
             data = self.db_connector.fetch_project_tasks(query)
             print("Datos obtenidos de la base de datos:", data)
 
             # Procesar los datos para el gráfico
-            tasks = []
             task_names = []
             task_start_dates = []
             task_end_dates = []
-            task_durations = []
 
             for projecttask in data:
-                project_id = projecttask.project_id
                 project_name = projecttask.project_name
                 start_date = projecttask.start_date
                 end_date = projecttask.end_date
-                notes = projecttask.notes
-
-                # Calcular la duración de la tarea en días
-                task_duration = (end_date - start_date).days + 1  # Duración de la tarea en días
-
-                # Agregar los valores a las listas
-                tasks.append(project_id)
                 task_names.append(project_name)
                 task_start_dates.append(start_date)
                 task_end_dates.append(end_date)
-                task_durations.append(task_duration)
 
-            # Crear las fechas en formato adecuado para el gráfico
-            dates = [start_of_week + timedelta(days=i) for i in range(6)]  # Lunes a Sábado
-            date_labels = [date.strftime('%d/%m/%Y') for date in dates]
-            day_names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+            # Crear etiquetas y fechas de lunes a sábado
+            dates = [start_of_week + timedelta(days=i) for i in range(7)]  # Incluye el sábado
+            date_labels = [f'{day} {date.strftime("%d/%m/%Y")}' for day, date in zip(
+                ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'], dates)]
 
-            # Crear el gráfico de líneas
+            # Crear los trazos del gráfico
             traces = []
+            y_positions = [i * 1.5 for i in range(len(task_names))]  # Espaciado amplio en Y
             for i, task in enumerate(task_names):
-                start_day = (task_start_dates[i] - start_of_week).days  # Días desde el inicio de la semana
-                end_day = (task_end_dates[i] - start_of_week).days
+                start_day = max(0, (task_start_dates[i] - start_of_week).days)
+                end_day = min(6, (task_end_dates[i] - start_of_week).days)  # Incluye hasta el sábado
 
-                # Agregar una línea para cada tarea
-                traces.append(go.Scatter(
-                    x=[start_day, end_day],
-                    y=[i, i],
-                    mode='lines+markers',
-                    name=task,
-                    line=dict(width=4),
-                    marker=dict(size=8)
-                ))
+                if start_day == end_day:
+                    traces.append(go.Scatter(
+                        x=[start_day, start_day + 0.8],  # Línea de un día de duración
+                        y=[y_positions[i], y_positions[i]],
+                        mode='lines+markers+text',
+                        line=dict(width=20),
+                        marker=dict(size=8),
+                        text=[task],
+                        textposition="middle right"
+                    ))
+                else:
+                    mid_point = (start_day + end_day) / 2
+                    traces.append(go.Scatter(
+                        x=[start_day, end_day],
+                        y=[y_positions[i], y_positions[i]],
+                        mode='lines+markers',
+                        line=dict(width=20),
+                        marker=dict(size=8)
+                    ))
+                    traces.append(go.Scatter(
+                        x=[mid_point],
+                        y=[y_positions[i]],
+                        mode='text',
+                        text=[task],
+                        textposition="middle center",
+                        showlegend=False
+                    ))
 
             fig = go.Figure(data=traces)
 
-            # Ajustar el eje X con los días de la semana y las fechas correspondientes
+            # Configuración del layout del gráfico
             fig.update_layout(
                 xaxis=dict(
-                    tickvals=list(range(6)),  # Los días de la semana (0 = Lunes, 1 = Martes, ..., 5 = Sábado)
-                    ticktext=[f'{day} {date}' for day, date in zip(day_names, date_labels)],  # Los nombres de los días con fechas
-                    title="Día de la Semana"
+                    tickmode="array",
+                    tickvals=[i - 0.25 for i in range(7)],  # Desplazar etiquetas a la izquierda
+                    ticktext=date_labels,
+                    title="Día de la Semana",
+                    side='top',  # Etiquetas del eje X en la parte superior
+                    range=[-0.5, 6.5]
                 ),
                 yaxis=dict(
-                    title="Tareas",
-                    tickvals=list(range(len(task_names)))  # Usamos las tareas para asignar valores en el eje Y
+                    title_text="",  # Sin título para el eje Y
+                    showticklabels=False,  # Quitar etiquetas del eje Y
+                    range=[-1, max(y_positions) + 1],  # Ajuste para dar espacio extra
                 ),
-                title="Cronograma Semanal"
+                title="Cronograma Semanal",
+                showlegend=False,
+                height=600
             )
 
-            # Actualizar el gráfico
             return dcc.Graph(
                 id='schedule-graph',
                 figure=fig
