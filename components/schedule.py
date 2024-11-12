@@ -74,6 +74,7 @@ class CronogramaSemanal:
             # Crear las fechas en formato adecuado para el gráfico
             dates = [start_of_week + timedelta(days=i) for i in range(6)]  # Lunes a Sábado
             date_labels = [date.strftime('%d/%m/%Y') for date in dates]
+            day_names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
             # Crear el gráfico de líneas
             traces = []
@@ -92,6 +93,20 @@ class CronogramaSemanal:
                 ))
 
             fig = go.Figure(data=traces)
+
+            # Ajustar el eje X con los días de la semana y las fechas correspondientes
+            fig.update_layout(
+                xaxis=dict(
+                    tickvals=list(range(6)),  # Los días de la semana (0 = Lunes, 1 = Martes, ..., 5 = Sábado)
+                    ticktext=[f'{day} {date}' for day, date in zip(day_names, date_labels)],  # Los nombres de los días con fechas
+                    title="Día de la Semana"
+                ),
+                yaxis=dict(
+                    title="Tareas",
+                    tickvals=list(range(len(task_names)))  # Usamos las tareas para asignar valores en el eje Y
+                ),
+                title="Cronograma Semanal"
+            )
 
             # Actualizar el gráfico
             return dcc.Graph(
