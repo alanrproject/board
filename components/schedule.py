@@ -1,5 +1,6 @@
 from dash import dcc, html, Input, Output
 from datetime import datetime, timedelta
+import plotly.graph_objects as go
 from utils.db import DatabaseConnector
 
 class CronogramaSemanal:
@@ -10,24 +11,7 @@ class CronogramaSemanal:
         self.register_callbacks()
 
     def create_layout(self):
-        # Obtener la estructura del calendario
-        days_of_week = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-        
-        # Crear el layout básico del calendario
-        calendar_layout = html.Div([
-            # Cabecera con los días de la semana
-            html.Div([
-                html.Div(day, className="calendar-header") for day in days_of_week
-            ], className="calendar-header-row"),
-
-            # Contenedores para cada día de la semana
-            html.Div([
-                html.Div([], id=f'calendar-day-{i}', className="calendar-day") 
-                for i in range(6)
-            ], className="calendar-days")
-        ], className="calendar-container")
-
-        # Define el layout para la pestaña de cronograma semanal, agregando el calendario
+        # Define el layout para la pestaña de cronograma semanal, agregando el gráfico
         return html.Div([
             dcc.Dropdown(
                 id='schedule-dropdown',
@@ -37,7 +21,7 @@ class CronogramaSemanal:
                 ],
                 placeholder="Selecciona una opción"
             ),
-            html.Div(id='schedule-output', className='tab-content', children=calendar_layout)
+            html.Div(id='schedule-output', className='tab-content')
         ])
 
     def register_callbacks(self):
@@ -63,22 +47,13 @@ class CronogramaSemanal:
             data = self.db_connector.fetch_project_tasks(query)
             print("Datos obtenidos de la base de datos:", data)
 
-            # Crear el layout del calendario
-            days_of_week = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-            calendar_layout = html.Div([
-                # Cabecera con los días de la semana
-                html.Div([
-                    html.Div(day, className="calendar-header") for day in days_of_week
-                ], className="calendar-header-row"),
+            # Procesar los datos para el gráfico
+            tasks = []
+            task_names = []
+            task_start_dates = []
+            task_end_dates = []
+            task_durations = []
 
-                # Contenedores para cada día de la semana
-                html.Div([
-                    html.Div([], id=f'calendar-day-{i}', className="calendar-day") 
-                    for i in range(6)
-                ], className="calendar-days")
-            ], className="calendar-container")
-
-            # Asignar las tareas a los días correspondientes
             for projecttask in data:
                 project_id = projecttask.project_id
                 project_name = projecttask.project_name
@@ -86,22 +61,40 @@ class CronogramaSemanal:
                 end_date = projecttask.end_date
                 notes = projecttask.notes
 
-                # Encontrar el día correspondiente a la fecha de inicio
-                day_index = (start_date.weekday())  # 0 = Lunes, 1 = Martes, ..., 5 = Sábado
-
-                # Calcular la duración de la tarea
+                # Calcular la duración de la tarea en días
                 task_duration = (end_date - start_date).days + 1  # Duración de la tarea en días
 
-                # Crear el contenido de la tarea
-                task_content = html.Div([
-                    html.P(f"ID: {project_id}"),
-                    html.P(f"Nombre: {project_name}"),
-                    html.P(f"Fecha de inicio: {start_date.strftime('%d/%m/%Y')}"),
-                    html.P(f"Fecha de fin: {end_date.strftime('%d/%m/%Y')}"),
-                    html.P(f"Notas: {notes}"),
-                ], className="task-content", style={"width": f"{task_duration * 1}%"} )
+                # Agregar los valores a las listas
+                tasks.append(project_id)
+                task_names.append(project_name)
+                task_start_dates.append(start_date)
+                task_end_dates.append(end_date)
+                task_durations.append(task_duration)
 
-                # Colocar la tarea en el día correspondiente
-                calendar_layout.children[1].children[day_index].children.append(task_content)
+            # Crear las fechas en formato adecuado para el gráfico
+            dates = [start_of_week + timedelta(days=i) for i in range(6)]  # Lunes a Sábado
+            date_labels = [date.strftime('%d/%m/%Y') for date in dates]
 
-            return calendar_layout
+            # Crear el gráfico de líneas
+            traces = []
+            for i, task in enumerate(task_names):
+                start_day = (task_start_dates[i] - start_of_week).days  # Días desde el inicio de la semana
+                end_day = (task_end_dates[i] - start_of_week).days
+
+                # Agregar una línea para cada tarea
+                traces.append(go.Scatter(
+                    x=[start_day, end_day],
+                    y=[i, i],
+                    mode='lines+markers',
+                    name=task,
+                    line=dict(width=4),
+                    marker=dict(size=8)
+                ))
+
+            fig = go.Figure(data=traces)
+
+            # Actualizar el gráfico
+            return dcc.Graph(
+                id='schedule-graph',
+                figure=fig
+            )
