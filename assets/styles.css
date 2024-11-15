@@ -56,3 +56,45 @@ body {
         gap: 10px;
     }
 }
+.kanban-sections {
+    display: flex;  /* Usa Flexbox para organizar las columnas horizontalmente */
+    flex-direction: column;  /* Asegura que haya un espacio equitativo entre las columnas */
+    padding: 10px;
+    gap: 20px;
+}
+
+.kanban-column-container {
+    flex: 1;  /* Hace que ambas columnas se distribuyan de manera uniforme */
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid #ddd;  /* Agrega borde opcional para visualización */
+    border-radius: 8px;
+}
+
+.kanban-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;  /* Asegura que las categorías dentro de la columna estén verticalmente alineadas */
+}
+
+.kanban-category {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;  /* Hace que los elementos dentro de la categoría se organicen verticalmente */
+    gap: 10px;
+}
+
+
+.kanban-card-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-card {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f4f4f4;  /* Fondo gris claro */
+    border: 1px solid #ccc;  /* Borde gris */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Sombra sutil */
+}

@@ -12,8 +12,8 @@ kanban = TableroKanban(app)
 # Estructura de la aplicación con pestañas
 app.layout = html.Div([
     dcc.Tabs([
-        dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
-        # dcc.Tab(label='Tablero Kanban', children=kanban.layout)
+        # dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
+        dcc.Tab(label='Tablero Kanban', children=kanban.layout)
     ])
 ])
 

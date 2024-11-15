@@ -17,10 +17,11 @@ class DatabaseConnector:
             database=self.database
         )
 
-    def fetch_projects(self):
+    def fetch_projects(self, query):
+        print("Ejecutando consulta SQL...")
         conn = self.connect()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id, nombre, estado, fecha_inicio, fecha_fin FROM projects")
+        cursor.execute(query)
         projects = [Project(**row) for row in cursor.fetchall()]
         cursor.close()
         conn.close()
@@ -34,5 +35,14 @@ class DatabaseConnector:
         cursor.close()
         conn.close()
         return tasks
+    
+    def fetch_categories(self, query):
+        conn = self.connect()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query)
+        categories = cursor.fetchall()  # Obtener todas las categorías como diccionarios
+        cursor.close()
+        conn.close()
+        return categories
 
 
