@@ -1,9 +1,10 @@
 from dash import Dash, dcc, html
 from components.schedule import CronogramaSemanal
 from components.kanban import TableroKanban
+import dash_bootstrap_components as dbc
 
 # Inicialización de la aplicación Dash
-app = Dash(__name__, suppress_callback_exceptions=True)
+app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Inicialización de las clases
 cronograma = CronogramaSemanal(app)
@@ -12,7 +13,7 @@ kanban = TableroKanban(app)
 # Estructura de la aplicación con pestañas
 app.layout = html.Div([
     dcc.Tabs([
-        # dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
+        dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
         dcc.Tab(label='Tablero Kanban', children=kanban.layout)
     ])
 ])
