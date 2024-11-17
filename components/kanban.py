@@ -1,6 +1,7 @@
 from dash import dcc, html, Input, Output, State
 from utils.db import DatabaseConnector
 import dash_bootstrap_components as dbc
+import dash
 
 class TableroKanban:
     def __init__(self, app):
@@ -10,20 +11,32 @@ class TableroKanban:
         self.register_callbacks()
 
     def create_layout(self):
-        return html.Div([
+        return html.Div([ 
             dcc.Store(id='kanban-initialized', data=True),  # Trigger para el callback
 
-            # Sección para Estado Retie
+            # Sección para Estado Retie (sin borde y con ícono)
             dbc.Row([
-                dbc.Col(html.H3('Estado Retie'), width=12),  # Título de la sección
+                dbc.Col(
+                    html.Div([
+                        html.I(className="bi bi-r-square-fill me-2"),
+                        html.H3('Estado Retie')
+                    ], className="d-flex align-items-center"),
+                    width=12
+                ),  # Título de la sección con ícono
                 dbc.Col(id='kanban-retie', className='kanban-column', width=12),  # Contenedor de columnas
-            ], className="mb-4 d-flex"),  # Añadimos d-flex a la fila
+            ], className="mb-5 d-flex", style={'margin-top': '20px'}),  # Se eliminan los bordes
 
-            # Sección para Estado OR
+            # Sección para Estado OR (sin borde y con ícono)
             dbc.Row([
-                dbc.Col(html.H3('Estado OR'), width=12),  # Título de la sección
+                dbc.Col(
+                    html.Div([
+                        html.I(className="bi bi-plug-fill me-2"),
+                        html.H3('Estado OR')
+                    ], className="d-flex align-items-center"),
+                    width=12
+                ),  # Título de la sección con ícono
                 dbc.Col(id='kanban-or', className='kanban-column', width=12),  # Contenedor de columnas
-            ], className="mb-4 d-flex"),  # Añadimos d-flex a la fila
+            ], className="mb-5 d-flex", style={'margin-top': '20px'}),  # Se eliminan los bordes
         ])
 
     def register_callbacks(self):
@@ -94,18 +107,24 @@ class TableroKanban:
                 style={
                     'max-height': '400px',  # Altura máxima antes de que aparezca la barra de desplazamiento
                     'overflow-y': 'auto',  # Habilita la barra de desplazamiento vertical
+                    'margin-top': '10px',
+                    'border': '1px solid #ccc',  # Agregar borde alrededor del contenedor de tarjetas
+                    'padding': '10px',  # Agregar margen superior al contenedor de tarjetas
                 }
+            )
+
+            # Encabezado de la categoría con estilo Flatly
+            category_header = dbc.CardHeader(
+                html.H5(category['var'], className="text-white bg-primary text-center py-2"),
+                className="rounded-top"
             )
 
             # Construcción de la columna por categoría
             columns.append(
                 dbc.Col([  # Columna de la categoría
-                    dbc.Card(
-                        dbc.CardHeader(html.H5(category['var'], className="text-white bg-primary text-center")),
-                        className="mb-3",
-                    ),
+                    category_header,  # Encabezado de la categoría
                     scrollable_container,  # Contenedor con desplazamiento
-                ], style={'flex': f'1 1 {column_width}%'}, className="px-1")  # Usamos el cálculo del ancho de columna
+                ], style={'flex': f'1 1 {column_width}%', 'border': '1px solid #ccc'}, className="px-1 mb-3")
             )
 
         # Aseguramos que todas las columnas estén en una sola fila sin envolver
