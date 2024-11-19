@@ -1,11 +1,12 @@
 class Project:
-    def __init__(self, id, name, code, fecha_inicio, retie_status, or_status):
+    def __init__(self, id, name, code, fecha_inicio, retie_status, or_status, notes=None):
         self.id = id
         self.name = name
         self.code = code
         self.fecha_inicio = fecha_inicio
         self.retie_status = retie_status
         self.or_status = or_status
+        self.notes = notes
 
 class ProjectTask:
     def __init__(self, project_id, project_name, start_date, end_date, notes):

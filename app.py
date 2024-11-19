@@ -21,8 +21,15 @@ app.layout = html.Div([
     
     # Pestañas para Cronograma y Kanban
     dcc.Tabs([
-        dcc.Tab(label='Cronograma Semanal', children=cronograma.layout),
-        dcc.Tab(label='Tablero Kanban', children=kanban.layout)
+        dcc.Tab(label='Cronograma Semanal',
+                children=cronograma.layout,
+                className="text-white bg-primary font-weight-bold",
+                selected_className="bg-dark"
+        ),
+        dcc.Tab(label='Tablero Kanban', children=kanban.layout,
+                className="text-white bg-primary font-weight-bold",
+                selected_className="bg-dark"
+        )
     ])
 ])
 

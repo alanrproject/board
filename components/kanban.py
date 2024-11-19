@@ -49,12 +49,8 @@ class TableroKanban:
         def update_kanban(_):
             # Obtener datos de los proyectos
             query = """SELECT 
-                p.id,
-                p.name,
-                p.code,
-                p.start_date AS fecha_inicio, 
-                rs.var AS retie_status,
-                os.var AS or_status
+                p.id, p.name, p.code, p.start_date AS fecha_inicio, p.notes,
+                rs.var AS retie_status, os.var AS or_status
             FROM 
                 projects p
             JOIN 
@@ -91,10 +87,10 @@ class TableroKanban:
             # Tarjetas visibles (todas las tarjetas de la categoría)
             visible_cards = [
                 dbc.Card(
-                    dbc.CardBody([  # Datos del proyecto
-                        html.H5(proj.name, className="card-title"),
-                        html.P(f"Inicio: {proj.fecha_inicio}", className="card-text"),
-                        html.P(f"Código: {proj.code}", className="card-text"),
+                    dbc.CardBody([
+                        html.H5(f"{proj.code} - {proj.name}", className="card-title"),
+                        html.P(f"Inicio: {proj.fecha_inicio}", className="card-text", style={"font-size": "0.9rem"}),
+                        html.P(f"{proj.notes}" if proj.notes else "Sin notas", className="card-text"),
                     ]),
                     className="mb-2",
                 )
@@ -114,9 +110,14 @@ class TableroKanban:
             )
 
             # Encabezado de la categoría con estilo Flatly
-            category_header = dbc.CardHeader(
-                html.H5(category['var'], className="text-white bg-primary text-center py-2"),
-                className="rounded-top"
+            category_header = dbc.Badge(
+                category['var'], 
+                color="success", 
+                style={
+                    'textAlign': 'center',  # Centrar el texto
+                    'fontSize': '1em',     # Aumentar el tamaño de la fuente
+                    'width': '100%'         # Asegura que el badge ocupe todo el ancho disponible para el centrado
+                }
             )
 
             # Construcción de la columna por categoría
